@@ -13,17 +13,17 @@ class ImagineController
     /**
      * @var DataManager
      */
-    protected $dataManager;
+    private $dataManager;
 
     /**
      * @var FilterManager
      */
-    protected $filterManager;
+    private $filterManager;
 
     /**
      * @var CacheManager
      */
-    protected $cacheManager;
+    private $cacheManager;
 
     /**
      * Constructor
@@ -40,6 +40,36 @@ class ImagineController
     }
 
     /**
+     * Get the dataManager specified in construct function
+     *
+     * @return DataManager
+     */
+    public function getDataManager()
+    {
+        return $this->dataManager;
+    }
+
+    /**
+     * Get the filterManager specified in construct function
+     *
+     * @return FilterManager
+     */
+    public function getFilterManager()
+    {
+        return $this->filterManager;
+    }
+
+    /**
+     * Get the cacheManager specified in construct function
+     *
+     * @return CacheManager
+     */
+    public function getCacheManager()
+    {
+        return $this->cacheManager;
+    }
+
+    /**
      * This action applies a given filter to a given image,
      * optionally saves the image and
      * outputs it to the browser at the same time
@@ -52,16 +82,16 @@ class ImagineController
      */
     public function filterAction(Request $request, $path, $filter)
     {
-        $targetPath = $this->cacheManager->resolve($request, $path, $filter);
+        $targetPath = $this->getCacheManager()->resolve($request, $path, $filter);
         if ($targetPath instanceof Response) {
             return $targetPath;
         }
 
-        $image = $this->dataManager->find($filter, $path);
-        $response = $this->filterManager->get($request, $filter, $image, $path);
+        $image = $this->getDataManager()->find($filter, $path);
+        $response = $this->getFilterManager()->get($request, $filter, $image, $path);
 
         if ($targetPath) {
-            $response = $this->cacheManager->store($response, $targetPath, $filter);
+            $response = $this->getCacheManager()->store($response, $targetPath, $filter);
         }
 
         return $response;

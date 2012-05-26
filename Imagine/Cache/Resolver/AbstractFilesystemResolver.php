@@ -10,7 +10,7 @@ abstract class AbstractFilesystemResolver implements ResolverInterface
     /**
      * @var Filesystem
      */
-    protected $filesystem;
+    private $filesystem;
 
     /**
      * Constructs a filesystem based cache resolver.
@@ -20,6 +20,16 @@ abstract class AbstractFilesystemResolver implements ResolverInterface
     public function __construct(Filesystem $filesystem)
     {
         $this->filesystem   = $filesystem;
+    }
+
+    /**
+     * Get the filesystem specified in construct function
+     *
+     * @return Filesystem
+     */
+    public function getFilesystem()
+    {
+        return $this->filesystem;
     }
 
     /**
@@ -37,7 +47,7 @@ abstract class AbstractFilesystemResolver implements ResolverInterface
     {
         $dir = pathinfo($targetPath, PATHINFO_DIRNAME);
 
-        if (!is_dir($dir) && !$this->filesystem->mkdir($dir)) {
+        if (!is_dir($dir) && !$this->getFilesystem()->mkdir($dir)) {
             throw new \RuntimeException(sprintf(
                 'Could not create directory %s', $dir
             ));
@@ -61,7 +71,7 @@ abstract class AbstractFilesystemResolver implements ResolverInterface
     public function remove($targetPath, $filter)
     {
         $filename = $this->getFilePath($targetPath, $filter);
-        $this->filesystem->remove($filename);
+        $this->getFilesystem()->remove($filename);
 
         return file_exists($filename);
     }

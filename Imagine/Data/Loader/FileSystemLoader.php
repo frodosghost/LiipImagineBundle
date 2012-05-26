@@ -11,17 +11,17 @@ class FileSystemLoader implements LoaderInterface
     /**
      * @var Imagine\Image\ImagineInterface
      */
-    protected $imagine;
+    private $imagine;
 
     /**
      * @var array
      */
-    protected $formats;
+    private $formats;
 
     /**
      * @var string
      */
-    protected $rootPath;
+    private $rootPath;
 
     /**
      * Constructs
@@ -51,6 +51,36 @@ class FileSystemLoader implements LoaderInterface
     }
 
     /**
+     * Get the rootPath as specified in construct function
+     *
+     * @return string
+     */
+    public function getRootPath()
+    {
+        return $this->rootPath;
+    }
+
+    /**
+     * Get the formats as specified in construct function
+     *
+     * @return array
+     */
+    public function getFormats()
+    {
+        return $this->formats;
+    }
+
+    /**
+     * Get the ImagineInterface specified in construct function
+     *
+     * @return ImagineInterface
+     */
+    public function getImagine()
+    {
+        return $this->imagine;
+    }
+
+    /**
      * @param string $path
      *
      * @return Imagine\Image\ImageInterface
@@ -61,18 +91,18 @@ class FileSystemLoader implements LoaderInterface
             throw new NotFoundHttpException(sprintf("Source image was searched with '%s' out side of the defined root path", $path));
         }
 
-        $file = $this->rootPath.'/'.ltrim($path, '/');
+        $file = $this->getRootPath().'/'.ltrim($path, '/');
         $info = $this->getFileInfo($file);
         $absolutePath = $info['dirname'].'/'.$info['basename'];
 
         $name = $info['dirname'].'/'.$info['filename'];
-        $targetFormat = empty($this->formats) || in_array($info['extension'], $this->formats)
+        $targetFormat = empty($this->getFormats()) || in_array($info['extension'], $this->getFormats())
             ? $info['extension'] : null;
 
         if (empty($targetFormat) || !file_exists($absolutePath)) {
             // attempt to determine path and format
             $absolutePath = null;
-            foreach ($this->formats as $format) {
+            foreach ($this->getFormats() as $format) {
                 if ($targetFormat !== $format
                     && file_exists($name.'.'.$format)
                 ) {
@@ -90,6 +120,6 @@ class FileSystemLoader implements LoaderInterface
             }
         }
 
-        return $this->imagine->open($absolutePath);
+        return $this->getImagine()->open($absolutePath);
     }
 }
