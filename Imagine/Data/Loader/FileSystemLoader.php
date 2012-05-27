@@ -96,7 +96,7 @@ class FileSystemLoader implements LoaderInterface
         $absolutePath = $info['dirname'].'/'.$info['basename'];
 
         $name = $info['dirname'].'/'.$info['filename'];
-        $targetFormat = empty($this->getFormats()) || in_array($info['extension'], $this->getFormats())
+        $targetFormat = empty($this->formats) || in_array($info['extension'], $this->formats)
             ? $info['extension'] : null;
 
         if (empty($targetFormat) || !file_exists($absolutePath)) {
