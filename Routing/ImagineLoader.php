@@ -46,11 +46,22 @@ class ImagineLoader extends Loader
                     'filter' => $filter,
                 );
 
-                $routes->add('_imagine_'.$filter, new Route(
-                    $pattern.'/{path}',
-                    $defaults,
-                    $requirements
-                ));
+                if (isset($config['breakpoints']))
+                {
+                    foreach ($config['breakpoints'] as $name => $width){
+                        $routes->add('_imagine_'.$filter.'_'.$name, new Route(
+                            $pattern.'_'. $name .'/{path}',
+                            $defaults,
+                            $requirements
+                        ));
+                    }
+                } else {
+                    $routes->add('_imagine_'.$filter, new Route(
+                        $pattern.'/{path}',
+                        $defaults,
+                        $requirements
+                    ));
+                }
             }
         }
 
