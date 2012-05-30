@@ -77,6 +77,14 @@ class CacheManager
     }
 
     /**
+     * @return FilterConfiguration
+     */
+    public function getFilterConfig()
+    {
+        return $this->filterConfig;
+    }
+
+    /**
      * @return string
      */
     public function getWebRoot()
