@@ -14,7 +14,7 @@ class WebPathResolver extends AbstractFilesystemResolver implements CacheManager
     /**
      * @var CacheManager
      */
-    protected $cacheManager;
+    private $cacheManager;
 
     /**
      * @param CacheManager $cacheManager
@@ -22,6 +22,14 @@ class WebPathResolver extends AbstractFilesystemResolver implements CacheManager
     public function setCacheManager(CacheManager $cacheManager)
     {
         $this->cacheManager = $cacheManager;
+    }
+
+    /**
+     * @return CacheManager
+     */
+    public function getCacheManager()
+    {
+        return $this->cacheManager;
     }
 
     /**
@@ -57,7 +65,7 @@ class WebPathResolver extends AbstractFilesystemResolver implements CacheManager
         return str_replace(
             urlencode($params['path']),
             urldecode($params['path']),
-            $this->cacheManager->getRouter()->generate('_imagine_'.$filter, $params, $absolute)
+            $this->getCacheManager()->getRouter()->generate('_imagine_'.$filter, $params, $absolute)
         );
     }
 
@@ -77,7 +85,7 @@ class WebPathResolver extends AbstractFilesystemResolver implements CacheManager
             $browserPath = substr($browserPath, strlen($basePath));
         }
 
-        return $this->cacheManager->getWebRoot().$browserPath;
+        return $this->getCacheManager()->getWebRoot().$browserPath;
     }
 
     /**
