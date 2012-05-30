@@ -19,13 +19,33 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * A variation - with some code copying - from AdaptiveImages
  * @link https://github.com/MattWilcox/Adaptive-Images
  */
-class AdaptivePathResolver extends WebPathResolver
+class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheManagerAwareInterface
 {
+    /**
+     * @var CacheManager
+     */
+    private $cacheManager;
+
     /**
      * @var RequestInterface
      */
     private $request_filter;
-    private $logger;
+
+    /**
+     * @param CacheManager $cacheManager
+     */
+    public function setCacheManager(CacheManager $cacheManager)
+    {
+        $this->cacheManager = $cacheManager;
+    }
+
+    /**
+     * @return CacheManager
+     */
+    public function getCacheManager()
+    {
+        return $this->cacheManager;
+    }
 
     /**
      * @return RequestInterface
@@ -38,10 +58,9 @@ class AdaptivePathResolver extends WebPathResolver
     /**
      * @param RequestInterface
      */
-    public function setRequestFilter(RequestInterface $request_filter, $logger)
+    public function setRequestFilter(RequestInterface $request_filter)
     {
         $this->request_filter = $request_filter;
-        $this->logger = $logger;
     }
 
     /**
