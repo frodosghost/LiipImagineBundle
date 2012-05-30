@@ -64,6 +64,13 @@ class FilterManager
                     'Could not find filter loader for "%s" filter type', $filter
                 ));
             }
+
+            // Pass the CSS breakpoints to the filter if the config array specifies
+            if (array_key_exists('breakpoints', $config))
+            {
+                $options = array_merge($options, array('breakpoints' => $config['breakpoints']));
+            }
+
             $image = $this->loaders[$filter]->load($image, $options);
         }
 

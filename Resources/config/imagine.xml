@@ -11,6 +11,8 @@
         <parameter key="liip_imagine.filter.manager.class">Liip\ImagineBundle\Imagine\Filter\FilterManager</parameter>
         <parameter key="liip_imagine.data.manager.class">Liip\ImagineBundle\Imagine\Data\DataManager</parameter>
         <parameter key="liip_imagine.cache.manager.class">Liip\ImagineBundle\Imagine\Cache\CacheManager</parameter>
+        <parameter key="liip_imagine.filter.request.cookie.class">Liip\ImagineBundle\Imagine\Filter\Request\CookieRequestFilter</parameter>
+        <parameter key="liip_imagine.filter.request.url.class">Liip\ImagineBundle\Imagine\Filter\Request\UrlRequestFilter</parameter>
 
         <!-- Controller class -->
 
@@ -25,6 +27,10 @@
         <parameter key="liip_imagine.twig.extension.class">Liip\ImagineBundle\Templating\ImagineExtension</parameter>
         <parameter key="liip_imagine.templating.helper.class">Liip\ImagineBundle\Templating\Helper\ImagineHelper</parameter>
 
+        <!-- Adaptive Image Tag Rendering -->
+        <parameter key="liip_imagine.renderer.class">Liip\ImagineBundle\Renderer\ImageRenderer</parameter>
+        <parameter key="liip_imagine.renderer.twig.template">image_tag.html.twig</parameter>
+
         <!-- ImagineInterface implementations -->
 
         <parameter key="liip_imagine.gd.class">Imagine\Gd\Imagine</parameter>
@@ -37,15 +43,18 @@
         <parameter key="liip_imagine.filter.loader.resize.class">Liip\ImagineBundle\Imagine\Filter\Loader\ResizeFilterLoader</parameter>
         <parameter key="liip_imagine.filter.loader.thumbnail.class">Liip\ImagineBundle\Imagine\Filter\Loader\ThumbnailFilterLoader</parameter>
         <parameter key="liip_imagine.filter.loader.crop.class">Liip\ImagineBundle\Imagine\Filter\Loader\CropFilterLoader</parameter>
+        <parameter key="liip_imagine.filter.loader.adaptive.class">Liip\ImagineBundle\Imagine\Filter\Loader\AdaptiveFilterLoader</parameter>
 
         <!-- Data loaders' classes -->
 
         <parameter key="liip_imagine.data.loader.filesystem.class">Liip\ImagineBundle\Imagine\Data\Loader\FileSystemLoader</parameter>
+        <parameter key="liip_imagine.data.loader.adaptivesystem.class">Liip\ImagineBundle\Imagine\Data\Loader\AdaptiveSystemLoader</parameter>
         <parameter key="liip_imagine.data.loader.stream.class">Liip\ImagineBundle\Imagine\Data\Loader\StreamLoader</parameter>
 
         <!-- Cache resolvers' classes -->
 
         <parameter key="liip_imagine.cache.resolver.web_path.class">Liip\ImagineBundle\Imagine\Cache\Resolver\WebPathResolver</parameter>
+        <parameter key="liip_imagine.cache.resolver.adaptive_path.class">Liip\ImagineBundle\Imagine\Cache\Resolver\AdaptivePathResolver</parameter>
 
     </parameters>
 
@@ -71,6 +80,18 @@
 
         <service id="liip_imagine.filter.configuration" class="%liip_imagine.filter.configuration.class%">
             <argument>%liip_imagine.filter_sets%</argument>
+        </service>
+
+        <service id="liip_imagine.filter.request.cookie" class="%liip_imagine.filter.request.cookie.class%">
+            <argument type="service" id="service_container" />
+        </service>
+        <service id="liip_imagine.filter.request.url" class="%liip_imagine.filter.request.url.class%">
+            <argument type="service" id="service_container" />
+        </service>
+
+        <service id="liip_imagine.renderer.image" class="%liip_imagine.renderer.class%">
+            <argument type="service" id="twig" />
+            <argument>%liip_imagine.renderer.twig.template%</argument>
         </service>
 
         <!-- Controller -->
@@ -105,6 +126,7 @@
         <service id="liip_imagine.twig.extension" class="%liip_imagine.twig.extension.class%" public="false">
             <tag name="twig.extension" />
             <argument type="service" id="liip_imagine.cache.manager" />
+            <argument type="service" id="liip_imagine.renderer.image" />
         </service>
 
         <service id="liip_imagine.templating.helper" class="%liip_imagine.templating.helper.class%">
@@ -130,10 +152,22 @@
             <tag name="liip_imagine.filter.loader" loader="crop" />
         </service>
 
+        <service id="liip_imagine.filter.loader.adaptive" class="%liip_imagine.filter.loader.adaptive.class%">
+            <tag name="liip_imagine.filter.loader" loader="adaptive" />
+            <argument type="service" id="liip_imagine.filter.request.url" />
+        </service>
+
         <!-- Data loaders -->
 
         <service id="liip_imagine.data.loader.filesystem" class="%liip_imagine.data.loader.filesystem.class%">
             <tag name="liip_imagine.data.loader" loader="filesystem" />
+            <argument type="service" id="liip_imagine" />
+            <argument>%liip_imagine.formats%</argument>
+            <argument>%liip_imagine.data_root%</argument>
+        </service>
+
+        <service id="liip_imagine.data.loader.adaptivesystem" class="%liip_imagine.data.loader.adaptivesystem.class%">
+            <tag name="liip_imagine.data.loader" loader="adaptive_system" />
             <argument type="service" id="liip_imagine" />
             <argument>%liip_imagine.formats%</argument>
             <argument>%liip_imagine.data_root%</argument>
@@ -144,6 +178,14 @@
         <service id="liip_imagine.cache.resolver.web_path" class="%liip_imagine.cache.resolver.web_path.class%">
             <tag name="liip_imagine.cache.resolver" resolver="web_path" />
             <argument type="service" id="filesystem" />
+        </service>
+
+        <service id="liip_imagine.cache.resolver.adaptive_path" class="%liip_imagine.cache.resolver.adaptive_path.class%">
+            <tag name="liip_imagine.cache.resolver" resolver="adaptive_path" />
+            <argument type="service" id="filesystem" />
+            <call method="setRequestFilter">
+                <argument type="service" id="liip_imagine.filter.request.cookie" />
+            </call>
         </service>
 
     </services>
