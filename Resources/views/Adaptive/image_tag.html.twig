@@ -2,7 +2,7 @@
 {% spaceless %}
  {% for attrname,attrvalue in options %}
  {% spaceless %}
-     {% if attrname in ['class', 'alt', 'title', 'id'] %}
+     {% if attrname in ['class', 'alt', 'title', 'id', 'style'] %}
          {{attrname}}="{{attrvalue}}" 
      {% else %}
          data-{{attrname}}="{{attrvalue}}" 
