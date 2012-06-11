@@ -32,6 +32,11 @@ class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheMa
     private $request_filter;
 
     /**
+     * @var string
+     */
+    private $css_breakpoint;
+
+    /**
      * @param CacheManager $cacheManager
      */
     public function setCacheManager(CacheManager $cacheManager)
@@ -64,10 +69,24 @@ class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheMa
     }
 
     /**
+     * Returns CSS Breakpoint name as sent in request for image display
+     */
+    public function getRouteParameter()
+    {
+        if (null === $this->css_breakpoint) {
+            throw new InvalidArgumentException('The route used is incorrect. No {name} parameter has been set');
+        }
+
+        return $this->css_breakpoint;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function resolve(Request $request, $path, $filter)
     {
+        $this->css_breakpoint = $request->attributes->get('name');
+
         $browserPath = $this->decodeBrowserPath($this->getBrowserPathForImage($path, $filter));
         $targetPath = $this->getFilePath($path, $filter, $request->getBaseUrl());
 
@@ -112,18 +131,6 @@ class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheMa
         return $image_paths;    
     }
 
-    private function getBrowserPathForImage($path, $filter)
-    {
-        // If resolving an image path remove the breakpoint added to cached image
-        $original_image = $this->getOriginalImagePath($path);
-
-        // Get all images with specified 
-        $images = $this->getBrowserPath($original_image, $filter);
-        $image_namespace = $this->getImageNamespacePath($path);
-
-        return $images[$image_namespace];
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -154,25 +161,24 @@ class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheMa
      */
     private function getImagePath($targetPath, $filter, $breakpoint_name, $absolute = false)
     {
-        // Update path with adaptive breakpoints in file name
-        $targetPath = str_replace(
-            basename($targetPath),
-            $breakpoint_name .'.'. basename($targetPath),
-            $targetPath
+        $params = array(
+            'path' => ltrim($targetPath, '/'),
+            'name' => $breakpoint_name
         );
-
-        $params = array('path' => ltrim($targetPath, '/'));
 
         return str_replace(
             urlencode($params['path']),
             urldecode($params['path']),
-            $this->getCacheManager()->getRouter()->generate('_imagine_'.$filter.'_'.$breakpoint_name, $params, $absolute)
+            $this->getCacheManager()->getRouter()->generate('_imagine_'.$filter, $params, $absolute)
         );
     }
 
     /**
      * Check browser specified cookie for resolution and return ordered array
      *
+     * @param array $breakpoints
+     *
+     * @return array
      */
     private function getImageBreakpoints($breakpoints)
     {
@@ -199,45 +205,26 @@ class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheMa
      *
      * @return string
      */
-    protected function decodeBrowserPath($browserPath)
+    private function decodeBrowserPath($path)
     {
         //TODO: find out why I need double urldecode to get a valid path
-        return urldecode(urldecode($browserPath));
+        return urldecode(urldecode($path));
     }
 
     /**
-     * Removes the Adaptive image namespace before the image
+     * Selects current image as determined from the route parameter
      *
-     * @param string $image_path 
-     *
-     * @return string
-     */
-    private function getOriginalImagePath($image_path)
-    {
-        // Return path with original image
-        return str_replace(
-            basename($image_path),
-            preg_replace('/^[^.]*.\s*/', '', basename($image_path)),
-            $image_path
-        );
-    }
-
-    /**
-     * Removes the Adaptive image namespace before the image
-     *
-     * @param string $image_path 
+     * @param string $path   Path that is provided from Route
+     * @param string $filter Filter that is to be run on the images
      *
      * @return string
      */
-    private function getImageNamespacePath($image_path)
+    private function getBrowserPathForImage($path, $filter)
     {
-        $breakpoint = null;
-        if (preg_match('/^[^.]*\s*/', basename($image_path), $matches))
-        {
-            $breakpoint = $matches[0];
-        }
+        // Get all images with specified 
+        $images = $this->getBrowserPath($path, $filter);
 
-        return $breakpoint;
+        return $images[$this->getRouteParameter()];
     }
 
     /**

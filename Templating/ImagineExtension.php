@@ -92,15 +92,16 @@ class ImagineExtension extends \Twig_Extension
      * Generates <img /> tag with selected image and alternate adaptive images
      *
      * @param string  $path     Location of original image to generate cached images
+     * @param string  $filter   Filter to use as inputted as configuration
      * @param array   $options  Options to pass into image tag
      * @param boolean $absolute Generate absolute links
      *
      * @return string
      */
-    public function adaptive_img($path, $options = array(), $absolute = false)
+    public function adaptive_img($path, $filter, $options = array(), $absolute = false)
     {
         $attributes = $options;
-        $image_array = $this->getCacheManager()->getBrowserPath($path, 'adaptive', $absolute);
+        $image_array = $this->getCacheManager()->getBrowserPath($path, $filter, $absolute);
 
         $image_src = array_shift($image_array);
         if (is_array($image_array))

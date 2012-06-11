@@ -7,14 +7,14 @@ use Liip\ImagineBundle\Imagine\Filter\RelativeResize;
 use Imagine\Image\ImageInterface;
 use Liip\ImagineBundle\Imagine\Filter\FilterConfiguration;
 use Liip\ImagineBundle\Imagine\Filter\Request\RequestInterface;
+use Imagine\Exception\InvalidArgumentException;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * AdaptiveFilterLoader
  *
- * Determines the image ratio and adaptivly assigns either 'widen' or 'heighten' method
- * to image resizing.
+ * Determines the name attribute from the request and resizes the image as specified in filter option
  *
  * @author James Rickard <james@frodosghost.com>
  */
@@ -32,12 +32,21 @@ class AdaptiveFilterLoader implements LoaderInterface
      */
     public function load(ImageInterface $image, array $options = array())
     {
-        $specified_image = $this->request_filter->filter('url');
-        $image_orientation = 'widen';
+        $route_name = $this->request_filter->filter('name');
 
-        $filter = new RelativeResize($image_orientation, $options['breakpoints'][$specified_image]);
+        if (!isset($options[$route_name]) && $options[$route_name] === null)
+        {
+            throw new InvalidArgumentException(sprintf('The filter option "%s" was not found in the configuration options', $route_name));
+        }
 
-        return $filter->apply($image);
+        if (list($method, $parameter) = each($options[$route_name]))
+        {
+            $filter = new RelativeResize($method, $parameter);
+
+            return $filter->apply($image);
+        }
+
+        throw new InvalidArgumentException('Expected method/parameter pair, none given');        
     }
 
 }

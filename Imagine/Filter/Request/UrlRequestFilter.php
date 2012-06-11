@@ -38,19 +38,15 @@ class UrlRequestFilter implements RequestInterface
 
     /**
      * Filter value from the service container
+     * Checks the Request URL for the {name} attribute and returns the value
      *
      * @param string @name
      */
     public function filter($name)
     {
-        $path = $this->getServiceContainer()->get('request')->getPathInfo();
+        $route_variable = $this->getServiceContainer()->get('request')->attributes->get($name);
 
-        if (preg_match('/^[^.]*\s*/', basename($path), $matches))
-        {
-            $breakpoint = $matches[0];
-        }
-
-        return $breakpoint;
+        return $route_variable;
     }
 
 }
