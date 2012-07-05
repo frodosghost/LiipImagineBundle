@@ -7,7 +7,8 @@ use Liip\ImagineBundle\Imagine\Cache\CacheManagerAwareInterface,
 
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\RedirectResponse,
-    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+    Symfony\Component\HttpKernel\Exception\NotFoundHttpException,
+    Symfony\Component\Finder\Finder;
 
 class WebPathResolver extends AbstractFilesystemResolver implements CacheManagerAwareInterface
 {
@@ -60,13 +61,25 @@ class WebPathResolver extends AbstractFilesystemResolver implements CacheManager
      */
     public function getBrowserPath($targetPath, $filter, $absolute = false)
     {
-        $params = array('path' => ltrim($targetPath, '/'));
+        return $this->cacheManager->generateUrl($targetPath, $filter, $absolute);
+    }
 
-        return str_replace(
-            urlencode($params['path']),
-            urldecode($params['path']),
-            $this->getCacheManager()->getRouter()->generate('_imagine_'.$filter, $params, $absolute)
-        );
+    /**
+     * {@inheritDoc}
+     */
+    public function clear($cachePrefix)
+    {
+        // Let's just avoid to remove the web/ directory content if cache prefix is empty
+        if ($cachePrefix === '') {
+            throw new \InvalidArgumentException("Cannot clear the Imagine cache because the cache_prefix is empty in your config.");
+        }
+
+        $cachePath = $this->cacheManager->getWebRoot() . DIRECTORY_SEPARATOR . $cachePrefix;
+
+        // Avoid an exception if the cache path does not exist (i.e. Imagine didn't yet render any image)
+        if (is_dir($cachePath)) {
+            $this->filesystem->remove(Finder::create()->in($cachePath)->depth(0)->directories());
+        }
     }
 
     /**

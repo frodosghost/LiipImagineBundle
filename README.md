@@ -128,7 +128,7 @@ Or if you're using PHP templates:
 <img src="<?php $this['imagine']->filter('/relative/path/to/image.jpg', 'my_thumb') ?>" />
 ```
 
-Behind the scenes, the bundles apples the filter(s) to the image on the first
+Behind the scenes, the bundles applies the filter(s) to the image on the first
 request and then caches the image to a similar path. On the next request,
 the cached image would be served directly from the file system.
 
@@ -360,7 +360,7 @@ requirement is that each data loader implement the following interface:
     Liip\ImagineBundle\Imagine\Data\Loader\LoaderInterface
 
 To tell the bundle about your new data loader, register it in the service
-container and apply the `liip_imagine.filter.loader` tag to it (example here in XML):
+container and apply the `liip_imagine.data.loader` tag to it (example here in XML):
 
 ``` xml
 <service id="acme_imagine.data.loader.my_custom" class="Acme\ImagineBundle\Imagine\Data\Loader\MyCustomDataLoader">
@@ -499,6 +499,13 @@ liip_imagine:
 
 For an example of a cache resolver implementation, refer to
 `Liip\ImagineBundle\Imagine\Cache\Resolver\WebPathResolver`.
+
+### Cache cleaner
+
+Custom cache resolver classes must implement the ```clear``` method, at worst doing nothing.
+
+When the ```console cache:clear``` command is run, the clear method of all the registered cache
+resolvers is automatically called.
 
 ### AmazonS3Resolver
 

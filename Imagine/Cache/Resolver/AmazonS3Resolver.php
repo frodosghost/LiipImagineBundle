@@ -127,13 +127,7 @@ class AmazonS3Resolver implements ResolverInterface, CacheManagerAwareInterface
             return $this->getObjectUrl($objectPath);
         }
 
-        $params = array('path' => ltrim($targetPath, '/'));
-
-        return str_replace(
-            urlencode($params['path']),
-            urldecode($params['path']),
-            $this->cacheManager->getRouter()->generate('_imagine_'.$filter, $params, $absolute)
-        );
+        return $this->cacheManager->generateUrl($targetPath, $filter, $absolute);
     }
 
     /**
@@ -167,6 +161,14 @@ class AmazonS3Resolver implements ResolverInterface, CacheManagerAwareInterface
         $this->objUrlOptions[$key] = $value;
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function clear($cachePrefix)
+    {
+        // TODO: implement cache clearing for Amazon S3 service
     }
 
     /**
