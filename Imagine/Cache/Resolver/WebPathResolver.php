@@ -74,11 +74,11 @@ class WebPathResolver extends AbstractFilesystemResolver implements CacheManager
             throw new \InvalidArgumentException("Cannot clear the Imagine cache because the cache_prefix is empty in your config.");
         }
 
-        $cachePath = $this->cacheManager->getWebRoot() . DIRECTORY_SEPARATOR . $cachePrefix;
+        $cachePath = $this->getCacheManager()->getWebRoot() . DIRECTORY_SEPARATOR . $cachePrefix;
 
         // Avoid an exception if the cache path does not exist (i.e. Imagine didn't yet render any image)
         if (is_dir($cachePath)) {
-            $this->filesystem->remove(Finder::create()->in($cachePath)->depth(0)->directories());
+            $this->getFilesystem()->remove(Finder::create()->in($cachePath)->depth(0)->directories());
         }
     }
 
