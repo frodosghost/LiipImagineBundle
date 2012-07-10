@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Resolves multiple paths for multiple images specified in css breakpoints.
@@ -145,7 +146,7 @@ class AdaptivePathResolver extends AbstractFilesystemResolver implements CacheMa
 
         // Avoid an exception if the cache path does not exist (i.e. Imagine didn't yet render any image)
         if (is_dir($cachePath)) {
-            $this->filesystem->remove(Finder::create()->in($cachePath)->depth(0)->directories());
+            $this->getFilesystem()->remove(Finder::create()->in($cachePath)->depth(0)->directories());
         }
     }
 
